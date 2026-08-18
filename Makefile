@@ -1,14 +1,12 @@
-GO        ?= go
-GOMOD2NIX ?= gomod2nix
-GINKGO    ?= ginkgo
+CARGO ?= cargo
 
-GO_SRC ?= $(shell find . -name '*.go')
+RUST_SRC ?= $(shell find . -name '*.rs')
 
 build:
 	nix build .#
 
 test:
-	$(GINKGO) run -r
+	$(CARGO) test
 
 update:
 	nix flake update
@@ -19,10 +17,7 @@ check lint:
 format fmt:
 	nix fmt
 
-tidy: go.sum nix/gomod2nix.toml
+tidy: Cargo.lock
 
-go.sum: go.mod ${GO_SRC}
-	$(GO) mod tidy
-
-nix/gomod2nix.toml: go.sum ${GO_SRC}
-	$(GOMOD2NIX) generate --dir ${CURDIR} --outdir ${@D}
+Cargo.lock: Cargo.toml ${RUST_SRC}
+	$(CARGO) generate-lockfile

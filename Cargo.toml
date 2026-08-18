@@ -1,0 +1,11 @@
+[package]
+name = "palutil"
+version = "0.0.1"
+edition = "2021"
+
+[[bin]]
+name = "palworld-utils"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }

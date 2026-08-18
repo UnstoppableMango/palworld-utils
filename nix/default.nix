@@ -1,12 +1,10 @@
 {
-  buildGoApplication,
-  lib,
+  craneLib,
   version,
 }:
-buildGoApplication {
+craneLib.buildPackage {
   pname = "palutil";
   inherit version;
 
-  src = lib.cleanSource ../.;
-  modules = ./gomod2nix.toml;
+  src = craneLib.cleanCargoSource ../.;
 }
