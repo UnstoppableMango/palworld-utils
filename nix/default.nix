@@ -5,7 +5,7 @@
   version,
 }:
 buildGoApplication {
-  pname = "";
+  pname = "palutil";
   inherit version;
 
   src = lib.cleanSource ../.;
