@@ -30,13 +30,18 @@
       imports = with inputs; [ treefmt-nix.flakeModule ];
 
       perSystem =
-        { pkgs, system, ... }:
+        {
+          inputs',
+          pkgs,
+          system,
+          ...
+        }:
         let
           version = "0.0.1";
 
           # `fenix.packages.${system}.targets.wasm32-unknown-unknown.stable.rust-std`
           # can be combined in here later if this project ever needs a WASM build.
-          toolchain = inputs.fenix.packages.${system}.stable.withComponents [
+          toolchain = inputs'.fenix.packages.stable.withComponents [
             "cargo"
             "rustc"
             "rustfmt"
@@ -69,14 +74,17 @@
               pkgs.gnumake
               pkgs.nixfmt
               toolchain
-              inputs.fenix.packages.${system}.rust-analyzer
+              inputs'.fenix.packages.rust-analyzer
             ];
           };
 
           treefmt.programs = {
             actionlint.enable = true;
             nixfmt.enable = true;
-            rustfmt.enable = true;
+            rustfmt = {
+              enable = true;
+              package = toolchain;
+            };
           };
         };
     };
