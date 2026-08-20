@@ -51,6 +51,7 @@ pub fn inspect(path: &Path) -> Result<String, InspectError> {
 
     let save = uesave::SaveReader::new()
         .types(palworld_types::palworld_types())
+        .error_to_raw(true)
         .read(Cursor::new(decoded.data))?;
 
     let magic = String::from_utf8_lossy(&decoded.magic);
