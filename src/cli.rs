@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
 
+use crate::steam_id;
+
 #[derive(Parser)]
 #[command(
     name = "palworld-utils",
@@ -14,6 +16,8 @@ pub struct Cli {
 pub enum Command {
     /// Convert Palworld save data
     Convert,
+    /// Convert a SteamID64 to a Palworld PlayerUId
+    SteamId { input: String },
 }
 
 pub fn execute() {
@@ -21,5 +25,12 @@ pub fn execute() {
 
     match cli.command {
         Command::Convert => {}
+        Command::SteamId { input } => match steam_id::steam_id64_to_palworld_player_id(&input) {
+            Ok(player_id) => println!("{player_id}"),
+            Err(err) => {
+                eprintln!("{err}");
+                std::process::exit(1);
+            }
+        },
     }
 }
