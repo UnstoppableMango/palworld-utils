@@ -56,6 +56,7 @@
         in
         {
           packages.default = palutil;
+          packages.palworld-types-codegen = pkgs.callPackage ./nix/palworld-types-codegen.nix { };
 
           checks.steam-id-cross-check = pkgs.callPackage ./nix/steam-id-check.nix { inherit palutil; };
 
