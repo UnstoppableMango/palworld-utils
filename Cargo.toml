@@ -9,3 +9,5 @@ path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
+oozextract = "0.5"
+uesave = "0.7"
