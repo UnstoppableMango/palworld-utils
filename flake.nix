@@ -51,9 +51,13 @@
 
           craneLib = (inputs.crane.mkLib pkgs).overrideToolchain toolchain;
           cargoArtifacts = craneLib.buildDepsOnly { src = craneLib.cleanCargoSource ./.; };
+
+          palutil = pkgs.callPackage ./nix { inherit version craneLib; };
         in
         {
-          packages.default = pkgs.callPackage ./nix { inherit version craneLib; };
+          packages.default = palutil;
+
+          checks.steam-id-cross-check = pkgs.callPackage ./nix/steam-id-check.nix { inherit palutil; };
 
           checks.palutil-test = craneLib.cargoTest {
             inherit cargoArtifacts version;
