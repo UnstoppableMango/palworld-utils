@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-use crate::{inspect, steam_id};
+use crate::{inspect, migrate_player, steam_id};
 
 #[derive(Parser)]
 #[command(
@@ -22,6 +22,22 @@ pub enum Command {
     SteamId { input: String },
     /// Inspect a Palworld save file
     Inspect { path: PathBuf },
+    /// Migrate a player's saves to a new PlayerUId (e.g. co-op host ->
+    /// dedicated server), writing the result to a separate output
+    /// directory -- the save at `save_path` is never modified.
+    MigratePlayer {
+        /// Path to the save folder (containing Level.sav and Players/)
+        save_path: PathBuf,
+        /// New PlayerUId, from an already-existing throwaway character on
+        /// the target server
+        new_guid: String,
+        /// Old PlayerUId (the player's current PlayerUId; for a co-op host
+        /// this is always 00000000000000000000000000000001)
+        old_guid: String,
+        /// Directory to write the migrated save into
+        #[arg(long)]
+        output: PathBuf,
+    },
 }
 
 pub fn execute() {
@@ -38,6 +54,18 @@ pub fn execute() {
         },
         Command::Inspect { path } => match inspect::inspect(&path) {
             Ok(summary) => println!("{summary}"),
+            Err(err) => {
+                eprintln!("{err}");
+                std::process::exit(1);
+            }
+        },
+        Command::MigratePlayer {
+            save_path,
+            new_guid,
+            old_guid,
+            output,
+        } => match migrate_player::migrate_player(&save_path, &output, &new_guid, &old_guid) {
+            Ok(()) => println!("{}", output.display()),
             Err(err) => {
                 eprintln!("{err}");
                 std::process::exit(1);
