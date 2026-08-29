@@ -1,4 +1,6 @@
+mod character_raw_data;
 mod cli;
+mod group_raw_data;
 mod inspect;
 mod palworld_type_hints;
 mod palworld_types;
