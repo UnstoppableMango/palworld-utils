@@ -15,10 +15,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    gomod2nix = {
-      url = "github:nix-community/gomod2nix";
+    crane.url = "github:ipetkov/crane";
+
+    fenix = {
+      url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.inputs.systems.follows = "systems";
     };
   };
 
@@ -29,38 +30,61 @@
       imports = with inputs; [ treefmt-nix.flakeModule ];
 
       perSystem =
-        { pkgs, system, ... }:
+        {
+          inputs',
+          pkgs,
+          system,
+          ...
+        }:
         let
           version = "0.0.1";
+
+          # `fenix.packages.${system}.targets.wasm32-unknown-unknown.stable.rust-std`
+          # can be combined in here later if this project ever needs a WASM build.
+          toolchain = inputs'.fenix.packages.stable.withComponents [
+            "cargo"
+            "rustc"
+            "rustfmt"
+            "clippy"
+            "rust-src"
+          ];
+
+          craneLib = (inputs.crane.mkLib pkgs).overrideToolchain toolchain;
+          cargoArtifacts = craneLib.buildDepsOnly { src = craneLib.cleanCargoSource ./.; };
         in
         {
-          _module.args.pkgs = import inputs.nixpkgs {
-            inherit system;
-            overlays = with inputs; [ gomod2nix.overlays.default ];
+          packages.default = pkgs.callPackage ./nix { inherit version craneLib; };
+
+          checks.palutil-test = craneLib.cargoTest {
+            inherit cargoArtifacts version;
+            pname = "palutil";
+            src = craneLib.cleanCargoSource ./.;
           };
 
-          packages.default = pkgs.callPackage ./nix { inherit version; };
+          checks.palutil-clippy = craneLib.cargoClippy {
+            inherit cargoArtifacts version;
+            pname = "palutil";
+            src = craneLib.cleanCargoSource ./.;
+            cargoClippyExtraArgs = "-- -D warnings";
+          };
 
           devShells.default = pkgs.mkShellNoCC {
-            packages = with pkgs; [
-              direnv
-              go
-              gomod2nix
-              gopls
-              ginkgo
-              gnumake
-              nixfmt
+            packages = [
+              pkgs.direnv
+              pkgs.gnumake
+              pkgs.nixfmt
+              toolchain
+              inputs'.fenix.packages.rust-analyzer
             ];
-
-            GO = "${pkgs.go}/bin/go";
-            GOMOD2NIX = "${pkgs.gomod2nix}/bin/gomod2nix";
-            GINKGO = "${pkgs.ginkgo}/bin/ginkgo";
           };
 
           treefmt.programs = {
             actionlint.enable = true;
             nixfmt.enable = true;
-            gofmt.enable = true;
+            rustfmt = {
+              enable = true;
+              package = toolchain;
+            };
           };
         };
     };
