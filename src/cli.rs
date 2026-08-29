@@ -1,6 +1,8 @@
+use std::path::PathBuf;
+
 use clap::{Parser, Subcommand};
 
-use crate::steam_id;
+use crate::{inspect, steam_id};
 
 #[derive(Parser)]
 #[command(
@@ -18,6 +20,8 @@ pub enum Command {
     Convert,
     /// Convert a SteamID64 to a Palworld PlayerUId
     SteamId { input: String },
+    /// Inspect a Palworld save file
+    Inspect { path: PathBuf },
 }
 
 pub fn execute() {
@@ -27,6 +31,13 @@ pub fn execute() {
         Command::Convert => {}
         Command::SteamId { input } => match steam_id::steam_id64_to_palworld_player_id(&input) {
             Ok(player_id) => println!("{player_id}"),
+            Err(err) => {
+                eprintln!("{err}");
+                std::process::exit(1);
+            }
+        },
+        Command::Inspect { path } => match inspect::inspect(&path) {
+            Ok(summary) => println!("{summary}"),
             Err(err) => {
                 eprintln!("{err}");
                 std::process::exit(1);

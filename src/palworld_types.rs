@@ -13,13 +13,10 @@
 //! `"Key"`/`"Value"` onto the scope for map key/value lookups the same way
 //! Python's `.Key`/`.Value` suffixes do.
 //!
-//! This is data-only groundwork: it isn't wired into a CLI command yet,
-//! since the custom `RawData` binary decoders it depends on (guild
+//! Consumed by `inspect.rs`; the custom `RawData` binary decoders (guild
 //! membership, character params -- Python's `PALWORLD_CUSTOM_PROPERTIES`)
-//! haven't been ported.
-
-// Not wired into the CLI yet -- see module doc comment.
-#![allow(dead_code)]
+//! that would let us fully interpret those properties haven't been ported
+//! yet.
 
 use uesave::{StructType, Types};
 
