@@ -1,0 +1,15 @@
+[package]
+name = "palutil"
+version = "0.0.1"
+edition = "2021"
+
+[[bin]]
+name = "palworld-utils"
+path = "src/main.rs"
+
+[dependencies]
+cityhasher = "0.1"
+clap = { version = "4", features = ["derive"] }
+flate2 = "1"
+oozextract = "0.5"
+uesave = "0.7"
